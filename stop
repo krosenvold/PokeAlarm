@@ -1,0 +1,2 @@
+kill `cat .alarm.pid`
+rm .alarm.pid

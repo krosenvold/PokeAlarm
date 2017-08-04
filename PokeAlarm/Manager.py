@@ -12,6 +12,7 @@ import os
 # 3rd Party Imports
 import gipc
 # Local Imports
+from PokeAlarm.fnord_geofence import get_geofences
 from . import config
 from Cache import cache_factory
 from Filters import load_pokemon_section, load_pokestop_section, load_gym_section, load_egg_section, \
@@ -23,6 +24,9 @@ from Geofence import load_geofence_file
 from LocationServices import LocationService
 
 log = logging.getLogger('Manager')
+
+fences = get_geofences("location_fences.txt", None)
+personalized_fences = get_geofences("personalized_fences.txt", None)
 
 
 class Manager(object):
@@ -601,18 +605,40 @@ class Manager(object):
 
         quick_id = pkmn['quick_id']
         charge_id = pkmn['charge_id']
+        form_ = pkmn.get('form_id',None)
+        cp = pkmn['cp']
+        level = pkmn['level']
+
 
         # Check all the geofences
         pkmn['geofence'] = self.check_geofences(name, lat, lng)
         if len(self.__geofences) > 0 and pkmn['geofence'] == 'unknown':
             log.info("{} rejected: not inside geofence(s)".format(name))
             return
+        fence_name = fences.fence_name(lat, lng)
+        if fence_name:
+            pkmn['location_fence'] = fence_name
+        else:
+            pkmn['location_fence'] = ""
+
+        total = ''
+        for fenceName in personalized_fences.fence_names(lat, lng):
+            total += '<@' + fenceName + "> "
+
+
 
         # Finally, add in all the extra crap we waited to calculate until now
         time_str = get_time_as_str(pkmn['disappear_time'], self.__timezone)
         iv = pkmn['iv']
         form_id = pkmn['form_id']
         form = self.__locale.get_form_name(pkmn_id, form_id)
+
+        if iv > 99:
+          total += "<@&315432063937282049>"
+
+        pkmn['user_notifications'] = total
+        log.info("PerzonalizedNotifications to " + total)
+
 
         pkmn.update({
             'pkmn': name,
@@ -1056,3 +1082,4 @@ class Manager(object):
         return 'unknown'
 
     ####################################################################################################################
+

@@ -1,9 +1,12 @@
 env
 *.pyc
 *.idea
-*.json
+alarms.json
 *.ini
 *.txt
 cache/*.cache
 !data/*.json
 !locales/*.json
+nohup.out
+.alarm.pid
+*~
