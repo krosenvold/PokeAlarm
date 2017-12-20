@@ -36,6 +36,7 @@ class FileCache(Cache):
             self._gym_info = data.get('gym_info', {})
             self._egg_hist = data.get('egg_hist', {})
             self._raid_hist = data.get('raid_hist', {})
+            self._geolocation = data.get('geolocations', {})
             log.debug("LOADED: \n {}".format(data))
 
     def _save(self):
@@ -47,7 +48,8 @@ class FileCache(Cache):
             'gym_team': self._gym_team,
             'gym_info': self._gym_info,
             'egg_hist': self._egg_hist,
-            'raid_hist': self._raid_hist
+            'raid_hist': self._raid_hist,
+            'geolocations': self._geolocations
         }
         log.debug(self._pokestop_hist)
         log.debug("SAVED: {}".format(data))

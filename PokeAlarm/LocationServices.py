@@ -12,15 +12,14 @@ log = logging.getLogger('LocService')
 class LocationService(object):
 
     # Initialize the APIs
-    def __init__(self, api_key, locale, units):
+    def __init__(self, api_key, locale, units, cache):
         self.__client = googlemaps.Client(key=api_key, timeout=3, retry_timeout=5)
-
+        self.cache = cache
         self.__locale = locale # Language to use for Geocoding results
         self.__units = units # imperial or metric
 
         # For Reverse Location API
         self.__reverse_location = False
-        self.__reverse_location_history = {}
         # Walking Dist/Time
         self.__walk_data = False
         self.__walk_data_history = {}
@@ -65,8 +64,9 @@ class LocationService(object):
     def __get_reverse_location(self, location):
         # Memoize the results
         key = "{:.5f},{:.5f}".format(location[0], location[1]) # ~1 meter of precision
-        if key in self.__reverse_location_history:
-            return self.__reverse_location_history[key]
+        cached = self.cache.get_geolocation(key)
+        if cached:
+            return cached
 
         details = { # Set some defaults in case something goes wrong
             'street_num': '???', 'street': 'unknown', 'address': 'unknown', 'postal': 'unknown',
@@ -93,7 +93,7 @@ class LocationService(object):
             details['county'] = loc.get('administrative_area_level_2', 'unknown')
             details['state'] = loc.get('administrative_area_level_1', 'unknown')
             details['country'] = loc.get('country', 'unknown')
-            self.__reverse_location_history[key] = details # If everything was successful, memoize for next time
+            self.cache.update_geolocation(key, details)
         except Exception as e:
             log.error("Encountered error while getting reverse location data ({}: {})".format(type(e).__name__, e))
             log.debug("Stack trace: \n {}".format(traceback.format_exc()))

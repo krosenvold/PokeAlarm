@@ -24,6 +24,7 @@ class Cache(object):
     def __init__(self):
         """ Initialize a new cache object, retrieving and previously saved results if possible. """
         self._pokemon_hist = {}
+        self._geolocations = {}
         self._pokestop_hist = {}
         self._gym_team = {}
         self._gym_info = {}
@@ -41,6 +42,12 @@ class Cache(object):
     def get_pokestop_expiration(self, stop_id):
         """ Returns the datetime that the pokemon expires. """
         return self._pokestop_hist.get(stop_id)
+
+    def update_geolocation(self, key, details):
+        self._geolocations[key] = details
+
+    def get_geolocation(self, key):
+        return self._geolocations.get(key)
 
     def update_pokestop_expiration(self, stop_id, expiration):
         """ Updates the datetime that the pokestop expires. """

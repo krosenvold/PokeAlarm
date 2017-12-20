@@ -37,12 +37,15 @@ class Manager(object):
         log.info("----------- Manager '{}' is being created.".format(self.__name))
         self.__debug = debug
 
+        # Create cache
+        self.__cache = cache_factory(cache_type, self.__name)
+
         # Get the Google Maps API
         self.__google_key = None
         self.__loc_service = None
         if str(google_key).lower() != 'none':
             self.__google_key = google_key
-            self.__loc_service = LocationService(google_key, locale, units)
+            self.__loc_service = LocationService(google_key, locale, units, self.__cache)
         else:
             log.warning("NO GOOGLE API KEY SET - Reverse Location and Distance Matrix DTS will NOT be detected.")
 
@@ -61,8 +64,6 @@ class Manager(object):
         # Quiet mode
         self.__quiet = quiet
 
-        # Create cache
-        self.__cache = cache_factory(cache_type, self.__name)
 
         # Load and Setup the Pokemon Filters
         self.__pokemon_settings, self.__pokestop_settings, self.__gym_settings = {}, {}, {}
