@@ -108,7 +108,7 @@ class Locale(object):
 
     # Returns the name of the form of for the given Pokemon ID and Form ID
     def get_form_name(self, pokemon_id, form_id):
-        return self.__form_names.get(pokemon_id, {}).get(form_id, 'unknown')
+        return self.__form_names.get(pokemon_id, {}).get(form_id, '')
 
     def get_boosted_text(self):
         return self.__misc.get('boosted', '')

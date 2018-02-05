@@ -10,8 +10,11 @@ from PokeAlarm.Utils import (
     get_applemaps_link, get_time_as_str, get_seconds_remaining,
     get_base_types, get_dist_as_str, get_weather_emoji,
     get_type_emoji)
+from PokeAlarm.fnord_geofence import get_geofences
 from . import BaseEvent
 
+fences = get_geofences("location_fences.txt", None)
+personalized_fences = get_geofences("personalized_fences.txt", None)
 
 class MonEvent(BaseEvent):
     """ Event representing the discovery of a Pokemon. """
@@ -39,6 +42,12 @@ class MonEvent(BaseEvent):
         # Location
         self.lat = float(data['latitude'])
         self.lng = float(data['longitude'])
+        fence_name = fences.fence_name(self.lat, self.lng)
+        self.location_fence = fence_name if fence_name else ""
+        total = ""
+        for fenceName in personalized_fences.fence_names(self.lat, self.lng):
+                        total += '<@' + fenceName + "> "
+
         self.distance = Unknown.SMALL  # Completed by Manager
         self.direction = Unknown.TINY  # Completed by Manager
         self.weather_id = check_for_none(
@@ -62,6 +71,10 @@ class MonEvent(BaseEvent):
                 100 * (self.atk_iv + self.def_iv + self.sta_iv) / float(45)
         else:
             self.iv = Unknown.SMALL
+        if self.iv > 99:
+            total += "<@&315432063937282049>"
+        self.user_notifications = total
+
         # Form
         self.form_id = check_for_none(int, data.get('form'), 0)
 
